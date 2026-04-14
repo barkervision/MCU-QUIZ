@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCU Quiz Challenge</title>
+  <style>
+    body { 
+      font-family: 'Arial', sans-serif; 
+      background: linear-gradient(#0a0a0a, #1f1f1f); 
+      color: #fff; 
+      text-align: center; 
+      padding: 40px 20px; 
+      margin: 0;
+    }
+    h1 { color: #e62429; font-size: 2.8em; margin-bottom: 10px; text-shadow: 0 0 10px #e62429; }
+    .container { max-width: 720px; margin: 0 auto; }
+    .question { font-size: 1.55em; margin: 40px 0 30px; min-height: 90px; line-height: 1.3; }
+    button { 
+      background: #e62429; 
+      color: white; 
+      border: none; 
+      padding: 16px 30px; 
+      margin: 10px; 
+      font-size: 1.15em; 
+      cursor: pointer; 
+      border-radius: 8px; 
+      min-width: 300px;
+      transition: all 0.2s;
+    }
+    button:hover { background: #c81e24; transform: scale(1.03); }
+    button:disabled { background: #555; cursor: not-allowed; transform: none; }
+    #result { font-size: 1.7em; margin: 50px 0; }
+    .progress { font-size: 1.2em; color: #ccc; margin-bottom: 15px; }
+    .correct { background: #00cc00 !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🦸‍♂️ MCU Quiz Challenge</h1>
+    <p>3 random multiple-choice questions from the Marvel Cinematic Universe</p>
+    
+    <div id="quiz">
+      <div class="progress" id="progress">Question <span id="q-num">1</span>/3</div>
+      <div class="question" id="question-text"></div>
+      <div id="options"></div>
+    </div>
+    
+    <div id="result" style="display:none;"></div>
+    <button id="next-btn" style="display:none; margin-top:30px; padding:18px 40px; font-size:1.3em;" onclick="nextQuestion()">Next Question</button>
+  </div>
+
+  <script>
+    const questionsDB = [
+      { q: "What is the name of Thor's hammer?", a: ["Mjolnir", "Stormbreaker", "Gungnir", "Axe of the All-Father"], correct: 0 },
+      { q: "Who is the Winter Soldier?", a: ["Bucky Barnes", "Steve Rogers", "Sam Wilson", "Clint Barton"], correct: 0 },
+      { q: "In what year was the first Iron Man movie released?", a: ["2008", "2010", "2012", "2005"], correct: 0 },
+      { q: "What is Captain America's shield made of?", a: ["Vibranium", "Adamantium", "Uru", "Titanium"], correct: 0 },
+      { q: "Who said the line 'I am Groot'?", a: ["Groot", "Rocket Raccoon", "Drax", "Yondu"], correct: 0 },
+      { q: "What is Black Widow's real name?", a: ["Natasha Romanoff", "Wanda Maximoff", "Maria Hill", "Yelena Belova"], correct: 0 },
+      { q: "Which Infinity Stone was housed in the Tesseract?", a: ["Space Stone", "Mind Stone", "Power Stone", "Soul Stone"], correct: 0 },
+      { q: "Who plays Spider-Man in the MCU?", a: ["Tom Holland", "Andrew Garfield", "Tobey Maguire", "Miles Morales (voice)"], correct: 0 },
+      { q: "What planet is Thanos from?", a: ["Titan", "Xandar", "Morag", "Vormir"], correct: 0 },
+      { q: "Which Avenger can shrink to tiny size?", a: ["Ant-Man", "Hulk", "Falcon", "Vision"], correct: 0 },
+      { q: "What is the name of Tony Stark's AI assistant in the early movies?", a: ["JARVIS", "FRIDAY", "ULTRON", "VISION"], correct: 0 },
+      { q: "Who directed the first Avengers movie?", a: ["Joss Whedon", "James Gunn", "Taika Waititi", "Ryan Coogler"], correct: 0 },
+      { q: "What does S.H.I.E.L.D. stand for?", a: ["Strategic Homeland Intervention, Enforcement and Logistics Division", "Super Hero Intelligence Enforcement League Division", "Strategic Heroes In Extreme Life Defense", "Secret Homeland Intelligence Enforcement League"], correct: 0 },
+      { q: "How many Infinity Stones are there?", a: ["6", "5", "7", "4"], correct: 0 },
+      { q: "What color is the Power Stone?", a: ["Purple", "Blue", "Red", "Orange"], correct: 0 },
+      { q: "Who is the God of Mischief?", a: ["Loki", "Thor", "Odin", "Heimdall"], correct: 0 },
+      { q: "What is the name of Doctor Strange's cloak?", a: ["Cloak of Levitation", "Crimson Bands of Cyttorak", "Eye of Agamotto Cape", "Sorcerer Supreme Robe"], correct: 0 },
+      { q: "In which movie did Black Panther first appear?", a: ["Captain America: Civil War", "Black Panther", "Avengers: Infinity War", "Avengers: Age of Ultron"], correct: 0 },
+      { q: "What is the real name of the Scarlet Witch?", a: ["Wanda Maximoff", "Agatha Harkness", "Monica Rambeau", "Darcy Lewis"], correct: 0 },
+      { q: "Who played the Hulk in the 2008 Incredible Hulk movie?", a: ["Edward Norton", "Mark Ruffalo", "Eric Bana", "Lou Ferrigno (voice)"], correct: 0 },
+      { q: "What is Star-Lord's real name?", a: ["Peter Quill", "Peter Parker", "Scott Lang", "Tony Stark"], correct: 0 },
+      { q: "Who says 'Avengers... assemble!' in Endgame?", a: ["Captain America", "Iron Man", "Thor", "Black Panther"], correct: 0 },
+      { q: "What is the name of Wakanda's king in the MCU?", a: ["T'Challa", "M'Baku", "Killmonger", "Okoye"], correct: 0 },
+      { q: "Which movie features the line 'I love you 3000'?", a: ["Avengers: Endgame", "Avengers: Infinity War", "Iron Man 3", "Spider-Man: Far From Home"], correct: 0 },
+      { q: "What is the name of the villain in Doctor Strange?", a: ["Dormammu", "Kaecilius", "Baron Mordo", "The Ancient One"], correct: 1 },
+      { q: "Who is Gamora's adoptive father?", a: ["Thanos", "Ronan", "Ego", "Yondu"], correct: 0 },
+      { q: "What weapon does Hawkeye primarily use?", a: ["Bow and Arrow", "Sniper Rifle", "Sword", "Shield"], correct: 0 },
+      { q: "In which movie do the Guardians of the Galaxy first appear?", a: ["Guardians of the Galaxy", "Avengers: Infinity War", "Thor: Ragnarok", "Captain Marvel"], correct: 0 },
+      { q: "What is the name of Tony Stark's daughter?", a: ["Morgan", "Pepper", "Harley", "Cassie"], correct: 0 },
+      { q: "Who becomes the new Captain America in Falcon and the Winter Soldier?", a: ["Sam Wilson", "Bucky Barnes", "John Walker", "Isaiah Bradley"], correct: 0 },
+      { q: "What is the first song played in Guardians of the Galaxy Vol. 1?", a: ["Come and Get Your Love", "Mr. Blue Sky", "Hooked on a Feeling", "I Want You Back"], correct: 0 },
+      { q: "Which character can phase through walls in the MCU?", a: ["Vision", "Ghost", "America Chavez", "Monica Rambeau"], correct: 1 },
+      { q: "What is the name of the building where the Avengers first assemble?", a: ["Stark Tower", "Avengers Tower", "Triskelion", "Sanctum Sanctorum"], correct: 0 },
+      { q: "Who kills Thanos with the sword in Endgame?", a: ["Thor", "Captain Marvel", "Scarlet Witch", "Iron Man"], correct: 2 },
+      { q: "What planet does Thor go to in Ragnarok?", a: ["Sakaar", "Asgard", "Nidavellir", "Xandar"], correct: 0 },
+      { q: "What is the name of the AI that becomes Ultron?", a: ["Ultron", "Vision", "JARVIS", "FRIDAY"], correct: 0 },
+      { q: "Who is the sorcerer supreme before Doctor Strange?", a: ["The Ancient One", "Wong", "Mordo", "Kaecilius"], correct: 0 },
+      { q: "What does Loki transform into in the first Thor movie to escape?", a: ["A snake", "A bird", "A guard", "Captain America"], correct: 0 },
+      { q: "Which Infinity Stone gives the user reality warping powers?", a: ["Reality Stone (Aether)", "Mind Stone", "Time Stone", "Power Stone"], correct: 0 }
+    ];
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startQuiz() {
+      currentQuestions = shuffle([...questionsDB]).slice(0, 3);
+      currentIndex = 0;
+      score = 0;
+      document.getElementById("result").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      document.getElementById("next-btn").style.display = "none";
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = currentQuestions[currentIndex];
+      document.getElementById("q-num").textContent = currentIndex + 1;
+      document.getElementById("question-text").innerHTML = q.q;
+      
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+      
+      q.a.forEach((answer, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = answer;
+        btn.onclick = () => checkAnswer(i, q.correct);
+        optionsDiv.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct) {
+      if (selected === correct) score++;
+      
+      const buttons = document.querySelectorAll("#options button");
+      buttons.forEach((b, i) => {
+        b.disabled = true;
+        if (i === correct) b.classList.add("correct");
+      });
+      
+      document.getElementById("next-btn").style.display = "inline-block";
+      if (currentIndex === 2) {
+        document.getElementById("next-btn").textContent = "See Your Score!";
+      }
+    }
+
+    function nextQuestion() {
+      currentIndex++;
+      if (currentIndex < 3) {
+        showQuestion();
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("next-btn").textContent = "Next Question";
+      } else {
+        endQuiz();
+      }
+    }
+
+    function endQuiz() {
+      document.getElementById("quiz").style.display = "none";
+      const resultDiv = document.getElementById("result");
+      resultDiv.style.display = "block";
+      
+      let message = score === 3 ? "🦸‍♂️ Perfect score! You're a true MCU Master!" :
+                    score === 2 ? "👍 Great job! Almost a perfect run!" :
+                    score === 1 ? "🍿 Not bad — time for a rewatch marathon!" :
+                    "Time to binge the entire saga again!";
+
+      resultDiv.innerHTML = `
+        <h2>Quiz Complete!</h2>
+        <p>Your score: <strong>${score}/3</strong></p>
+        <p>${message}</p>
+        <button onclick="startQuiz()" style="background:#00bfff; padding:18px 40px; font-size:1.3em;">Play Again</button>
+      `;
+    }
+
+    window.onload = startQuiz;
+  </script>
+</body>
+</html>
