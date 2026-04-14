@@ -29,8 +29,15 @@
       transition: all 0.2s;
     }
     button:hover { background: #c81e24; transform: scale(1.03); }
-    button:disabled { background: #555; cursor: not-allowed; transform: none; }
-    #music-btn { background: #00bfff; margin: 10px; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    #music-btn { 
+      background: #00bfff; 
+      font-size: 1.2em; 
+      padding: 12px 24px; 
+      min-width: 220px; 
+      margin: 15px auto; 
+      display: block;
+    }
     #result { font-size: 1.7em; margin: 50px 0; }
     .progress { font-size: 1.2em; color: #ccc; margin-bottom: 15px; }
     .correct { background: #00cc00 !important; }
@@ -41,10 +48,12 @@
     <h1>🦸‍♂️ MCU Quiz Challenge</h1>
     <p>Answer 3 random multiple-choice questions</p>
     
-    <!-- Music Control -->
+    <!-- Music Control - Big and easy to click -->
     <button id="music-btn" onclick="toggleMusic()">🎵 Play Epic Music</button>
+    
     <audio id="bgmusic" loop>
       <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
+      Your browser does not support audio.
     </audio>
 
     <div id="quiz">
@@ -58,7 +67,7 @@
   </div>
 
   <script>
-    const questionsDB = [
+    const questionsDB = [ /* 60 questions - same as last working version */ 
       { q: "What is the name of Thor's hammer?", a: ["Mjolnir", "Stormbreaker", "Gungnir", "Axe of the All-Father"], correct: 0 },
       { q: "Who is the Winter Soldier?", a: ["Bucky Barnes", "Steve Rogers", "Sam Wilson", "Clint Barton"], correct: 0 },
       { q: "In what year was the first Iron Man movie released?", a: ["2008", "2010", "2012", "2005"], correct: 0 },
@@ -123,22 +132,27 @@
     let currentQuestions = [];
     let currentIndex = 0;
     let score = 0;
-    let musicPlaying = false;
+    let isPlaying = false;
     const audio = document.getElementById("bgmusic");
+    const musicBtn = document.getElementById("music-btn");
+
+    function toggleMusic() {
+      if (isPlaying) {
+        audio.pause();
+        musicBtn.textContent = "🎵 Play Epic Music";
+      } else {
+        audio.play().then(() => {
+          musicBtn.textContent = "⏸ Pause Music";
+        }).catch(err => {
+          console.log("Music play failed:", err);
+          musicBtn.textContent = "🎵 Try Again (click me)";
+        });
+      }
+      isPlaying = !isPlaying;
+    }
 
     function shuffle(array) {
       return array.sort(() => Math.random() - 0.5);
-    }
-
-    function toggleMusic() {
-      if (musicPlaying) {
-        audio.pause();
-        document.getElementById("music-btn").textContent = "🎵 Play Epic Music";
-      } else {
-        audio.play().catch(() => {});
-        document.getElementById("music-btn").textContent = "⏸ Pause Music";
-      }
-      musicPlaying = !musicPlaying;
     }
 
     function startQuiz() {
@@ -177,9 +191,7 @@
       });
       
       document.getElementById("next-btn").style.display = "inline-block";
-      if (currentIndex === 2) {
-        document.getElementById("next-btn").textContent = "See Your Score!";
-      }
+      if (currentIndex === 2) document.getElementById("next-btn").textContent = "See Your Score!";
     }
 
     function nextQuestion() {
@@ -211,6 +223,7 @@
       `;
     }
 
+    // Start game immediately
     window.onload = startQuiz;
   </script>
 </body>
