@@ -10,100 +10,102 @@
     body {
       font-family: 'Roboto', sans-serif;
       margin: 0;
-      padding: 20px 10px;
+      padding: 15px 10px;
       min-height: 100vh;
-      background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.75)), 
+      background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), 
                   url('https://picsum.photos/id/1015/1920/1080') center/cover no-repeat fixed;
       color: #fff;
       text-align: center;
     }
 
     .container {
-      max-width: 740px;
+      max-width: 720px;
       margin: 0 auto;
-      background: rgba(0, 0, 0, 0.45);
-      border-radius: 20px;
-      padding: 35px 25px;
-      box-shadow: 0 0 40px rgba(230, 36, 41, 0.6);
-      border: 2px solid rgba(230, 36, 41, 0.3);
+      background: rgba(0, 0, 0, 0.35);   /* Lighter for mobile */
+      border-radius: 18px;
+      padding: 25px 20px;
+      box-shadow: 0 0 30px rgba(230, 36, 41, 0.5);
+      border: 1px solid rgba(230, 36, 41, 0.4);
     }
 
     h1 {
       font-family: 'Impact', sans-serif;
       color: #e62429;
-      font-size: 3.4em;
+      font-size: 2.9em;
       margin: 10px 0 8px;
-      text-shadow: 0 0 20px #e62429, 0 0 30px #e62429;
-      letter-spacing: 3px;
+      text-shadow: 0 0 20px #e62429;
+      letter-spacing: 2px;
     }
 
     p {
-      font-size: 1.25em;
+      font-size: 1.2em;
       color: #ddd;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     #music-btn {
       background: #00bfff;
       color: white;
       border: none;
-      padding: 14px 32px;
-      font-size: 1.3em;
+      padding: 12px 30px;
+      font-size: 1.25em;
       border-radius: 50px;
-      margin: 20px auto;
+      margin: 15px auto;
       display: block;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(0, 191, 255, 0.5);
     }
 
     .progress {
-      font-size: 1.3em;
+      font-size: 1.25em;
       color: #ccc;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .question {
-      font-size: 1.75em;
-      margin: 40px 0 30px;
-      min-height: 120px;
-      line-height: 1.4;
+      font-size: 1.65em;
+      margin: 35px 0 25px;
+      min-height: 110px;
+      line-height: 1.35;
       font-weight: 500;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
     }
 
     button.answer-btn {
       background: #e62429;
       color: white;
       border: none;
-      padding: 20px 35px;
-      margin: 12px auto;
-      font-size: 1.25em;
+      padding: 18px 30px;
+      margin: 10px auto;
+      font-size: 1.2em;
       cursor: pointer;
-      border-radius: 14px;
-      min-width: 340px;
+      border-radius: 12px;
+      min-width: 300px;
       display: block;
-      transition: all 0.3s;
-      box-shadow: 0 6px 15px rgba(230, 36, 41, 0.4);
+      transition: all 0.25s;
     }
 
     button.answer-btn:hover {
       background: #ff2d33;
-      transform: translateY(-4px) scale(1.05);
+      transform: scale(1.04);
     }
 
     button.answer-btn:disabled {
       background: #555;
-      transform: none;
     }
 
     .correct {
       background: #00cc00 !important;
-      box-shadow: 0 0 20px #00ff88;
     }
 
     #result {
-      font-size: 1.85em;
-      margin: 50px 0;
+      font-size: 1.7em;
+      margin: 40px 0;
+    }
+
+    /* Mobile improvements */
+    @media (max-width: 600px) {
+      h1 { font-size: 2.5em; }
+      .question { font-size: 1.45em; min-height: 100px; }
+      button.answer-btn { min-width: 280px; padding: 16px 25px; }
     }
   </style>
 </head>
@@ -125,7 +127,7 @@
     </div>
     
     <div id="result" style="display:none;"></div>
-    <button id="next-btn" style="display:none; margin-top:30px; padding:18px 45px; font-size:1.35em;" onclick="nextQuestion()">Next Question</button>
+    <button id="next-btn" style="display:none; margin-top:25px; padding:16px 40px; font-size:1.3em;" onclick="nextQuestion()">Next Question</button>
   </div>
 
   <script>
