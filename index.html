@@ -16,12 +16,13 @@
                   url('https://picsum.photos/id/1015/1920/1080') center/cover no-repeat fixed;
       color: #fff;
       text-align: center;
+      transition: background 0.6s;
     }
 
     .container {
       max-width: 720px;
       margin: 0 auto;
-      background: rgba(0, 0, 0, 0.35);   /* Lighter for mobile */
+      background: rgba(0, 0, 0, 0.35);
       border-radius: 18px;
       padding: 25px 20px;
       box-shadow: 0 0 30px rgba(230, 36, 41, 0.5);
@@ -37,11 +38,7 @@
       letter-spacing: 2px;
     }
 
-    p {
-      font-size: 1.2em;
-      color: #ddd;
-      margin-bottom: 15px;
-    }
+    p { font-size: 1.2em; color: #ddd; margin-bottom: 15px; }
 
     #music-btn {
       background: #00bfff;
@@ -55,11 +52,7 @@
       cursor: pointer;
     }
 
-    .progress {
-      font-size: 1.25em;
-      color: #ccc;
-      margin-bottom: 12px;
-    }
+    .progress { font-size: 1.25em; color: #ccc; margin-bottom: 12px; }
 
     .question {
       font-size: 1.65em;
@@ -83,30 +76,29 @@
       transition: all 0.25s;
     }
 
-    button.answer-btn:hover {
-      background: #ff2d33;
-      transform: scale(1.04);
+    button.answer-btn:hover { background: #ff2d33; transform: scale(1.04); }
+    button.answer-btn:disabled { background: #555; }
+
+    .correct { background: #00cc00 !important; }
+
+    #result { font-size: 1.8em; margin: 40px 0; }
+
+    /* Loser shake effect */
+    @keyframes loserShake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      10% { transform: translate(-1px, -2px) rotate(-1deg); }
+      20% { transform: translate(-3px, 0px) rotate(1deg); }
+      30% { transform: translate(3px, 2px) rotate(0deg); }
+      40% { transform: translate(1px, -1px) rotate(1deg); }
+      50% { transform: translate(-1px, 2px) rotate(-1deg); }
+      60% { transform: translate(-3px, 1px) rotate(0deg); }
+      70% { transform: translate(3px, 2px) rotate(-1deg); }
+      80% { transform: translate(-1px, -1px) rotate(1deg); }
+      90% { transform: translate(1px, 2px) rotate(0deg); }
+      100% { transform: translate(1px, -2px) rotate(-1deg); }
     }
 
-    button.answer-btn:disabled {
-      background: #555;
-    }
-
-    .correct {
-      background: #00cc00 !important;
-    }
-
-    #result {
-      font-size: 1.7em;
-      margin: 40px 0;
-    }
-
-    /* Mobile improvements */
-    @media (max-width: 600px) {
-      h1 { font-size: 2.5em; }
-      .question { font-size: 1.45em; min-height: 100px; }
-      button.answer-btn { min-width: 280px; padding: 16px 25px; }
-    }
+    .loser-mode { animation: loserShake 0.5s; animation-iteration-count: 4; }
   </style>
 </head>
 <body>
@@ -131,7 +123,7 @@
   </div>
 
   <script>
-    const questionsDB = [
+    const questionsDB = [ /* Your full 60 questions - same as last working version */ 
       { q: "What is the name of Thor's hammer?", a: ["Mjolnir", "Stormbreaker", "Gungnir", "Axe of the All-Father"], correct: 0 },
       { q: "Who is the Winter Soldier?", a: ["Bucky Barnes", "Steve Rogers", "Sam Wilson", "Clint Barton"], correct: 0 },
       { q: "In what year was the first Iron Man movie released?", a: ["2008", "2010", "2012", "2005"], correct: 0 },
@@ -199,6 +191,7 @@
     let isPlaying = false;
     const audio = document.getElementById("bgmusic");
     const musicBtn = document.getElementById("music-btn");
+    const body = document.body;
 
     function toggleMusic() {
       if (isPlaying) {
@@ -211,6 +204,34 @@
       isPlaying = !isPlaying;
     }
 
+    // Confetti for perfect score
+    function launchConfetti() {
+      for (let i = 0; i < 150; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement("div");
+          confetti.style.position = "fixed";
+          confetti.style.left = Math.random() * 100 + "vw";
+          confetti.style.top = "-10px";
+          confetti.style.width = "10px";
+          confetti.style.height = "10px";
+          confetti.style.background = ["#e62429", "#00bfff", "#ffd700", "#00ff88"][Math.floor(Math.random()*4)];
+          confetti.style.opacity = Math.random() + 0.5;
+          confetti.style.transform = `rotate(${Math.random()*360}deg)`;
+          document.body.appendChild(confetti);
+
+          let y = -10;
+          const fall = setInterval(() => {
+            y += 8 + Math.random() * 6;
+            confetti.style.top = y + "px";
+            if (y > window.innerHeight) {
+              clearInterval(fall);
+              confetti.remove();
+            }
+          }, 20);
+        }, i * 3);
+      }
+    }
+
     function shuffle(array) {
       return array.sort(() => Math.random() - 0.5);
     }
@@ -219,6 +240,7 @@
       currentQuestions = shuffle([...questionsDB]).slice(0, 3);
       currentIndex = 0;
       score = 0;
+      body.classList.remove("loser-mode");
       document.getElementById("result").style.display = "none";
       document.getElementById("quiz").style.display = "block";
       document.getElementById("next-btn").style.display = "none";
@@ -270,14 +292,28 @@
       document.getElementById("quiz").style.display = "none";
       const resultDiv = document.getElementById("result");
       resultDiv.style.display = "block";
-      
-      let message = score === 3 ? "🦸‍♂️ Perfect score! You're a true MCU Master!" :
-                    score === 2 ? "👍 Great job! Almost a perfect run!" :
-                    score === 1 ? "🍿 Not bad — time for a rewatch marathon!" :
-                    "Time to binge the entire saga again!";
+
+      let message = "";
+      let emoji = "";
+
+      if (score === 3) {
+        message = "🦸‍♂️ Perfect score! You're a true MCU Master!";
+        emoji = "🎉";
+        launchConfetti();
+      } else if (score === 2) {
+        message = "👍 Great job! Almost a perfect run!";
+        emoji = "🔥";
+      } else if (score === 1) {
+        message = "🍿 Not bad — time for a rewatch marathon!";
+        emoji = "📺";
+      } else {
+        message = "Time to binge the entire saga again!";
+        emoji = "😢";
+        body.classList.add("loser-mode");   // Shake effect for 0/3
+      }
 
       resultDiv.innerHTML = `
-        <h2>Quiz Complete!</h2>
+        <h2>Quiz Complete! ${emoji}</h2>
         <p>Your score: <strong>${score}/3</strong></p>
         <p>${message}</p>
         <button onclick="startQuiz()" style="background:#00bfff; padding:18px 45px; font-size:1.35em;">Play Again</button>
