@@ -16,7 +16,6 @@
                   url('https://picsum.photos/id/1015/1920/1080') center/cover no-repeat fixed;
       color: #fff;
       text-align: center;
-      transition: background 0.6s;
     }
 
     .container {
@@ -26,41 +25,23 @@
       border-radius: 18px;
       padding: 25px 20px;
       box-shadow: 0 0 30px rgba(230, 36, 41, 0.5);
-      border: 1px solid rgba(230, 36, 41, 0.4);
     }
 
-    h1 {
-      font-family: 'Impact', sans-serif;
-      color: #e62429;
-      font-size: 2.9em;
-      margin: 10px 0 8px;
-      text-shadow: 0 0 20px #e62429;
-      letter-spacing: 2px;
-    }
-
+    h1 { font-family: 'Impact', sans-serif; color: #e62429; font-size: 2.9em; margin: 10px 0 8px; text-shadow: 0 0 20px #e62429; }
     p { font-size: 1.2em; color: #ddd; margin-bottom: 15px; }
 
-    #music-btn {
-      background: #00bfff;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      font-size: 1.25em;
-      border-radius: 50px;
-      margin: 15px auto;
-      display: block;
-      cursor: pointer;
+    #timer-bar {
+      height: 8px;
+      background: #e62429;
+      width: 100%;
+      margin-bottom: 15px;
+      border-radius: 4px;
+      transition: width 0.2s linear;
     }
 
-    .progress { font-size: 1.25em; color: #ccc; margin-bottom: 12px; }
+    #time-left { font-size: 1.1em; color: #ffcc00; margin-bottom: 8px; }
 
-    .question {
-      font-size: 1.65em;
-      margin: 35px 0 25px;
-      min-height: 110px;
-      line-height: 1.35;
-      font-weight: 500;
-    }
+    .question { font-size: 1.65em; margin: 25px 0 20px; min-height: 110px; line-height: 1.35; }
 
     button.answer-btn {
       background: #e62429;
@@ -73,38 +54,19 @@
       border-radius: 12px;
       min-width: 300px;
       display: block;
-      transition: all 0.25s;
     }
 
     button.answer-btn:hover { background: #ff2d33; transform: scale(1.04); }
     button.answer-btn:disabled { background: #555; }
-
     .correct { background: #00cc00 !important; }
 
     #result { font-size: 1.8em; margin: 40px 0; }
-
-    /* Loser shake effect */
-    @keyframes loserShake {
-      0% { transform: translate(1px, 1px) rotate(0deg); }
-      10% { transform: translate(-1px, -2px) rotate(-1deg); }
-      20% { transform: translate(-3px, 0px) rotate(1deg); }
-      30% { transform: translate(3px, 2px) rotate(0deg); }
-      40% { transform: translate(1px, -1px) rotate(1deg); }
-      50% { transform: translate(-1px, 2px) rotate(-1deg); }
-      60% { transform: translate(-3px, 1px) rotate(0deg); }
-      70% { transform: translate(3px, 2px) rotate(-1deg); }
-      80% { transform: translate(-1px, -1px) rotate(1deg); }
-      90% { transform: translate(1px, 2px) rotate(0deg); }
-      100% { transform: translate(1px, -2px) rotate(-1deg); }
-    }
-
-    .loser-mode { animation: loserShake 0.5s; animation-iteration-count: 4; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>MCU QUIZ CHALLENGE</h1>
-    <p>Test your knowledge of the Marvel Cinematic Universe</p>
+    <p>Answer fast — 20 seconds per question!</p>
     
     <button id="music-btn" onclick="toggleMusic()">🎵 Play Epic Music</button>
     
@@ -113,6 +75,8 @@
     </audio>
 
     <div id="quiz">
+      <div id="time-left">Time left: <span id="timer">20</span>s</div>
+      <div id="timer-bar"></div>
       <div class="progress">Question <span id="q-num">1</span>/3</div>
       <div class="question" id="question-text"></div>
       <div id="options"></div>
@@ -188,48 +152,44 @@
  let currentQuestions = [];
     let currentIndex = 0;
     let score = 0;
+    let timeLeft = 20;
+    let timerInterval;
     let isPlaying = false;
     const audio = document.getElementById("bgmusic");
     const musicBtn = document.getElementById("music-btn");
-    const body = document.body;
 
     function toggleMusic() {
       if (isPlaying) {
         audio.pause();
         musicBtn.textContent = "🎵 Play Epic Music";
       } else {
-        audio.play().then(() => musicBtn.textContent = "⏸ Pause Music")
-                   .catch(() => musicBtn.textContent = "🎵 Tap again");
+        audio.play().then(() => musicBtn.textContent = "⏸ Pause Music");
       }
       isPlaying = !isPlaying;
     }
 
-    // Confetti for perfect score
-    function launchConfetti() {
-      for (let i = 0; i < 150; i++) {
-        setTimeout(() => {
-          const confetti = document.createElement("div");
-          confetti.style.position = "fixed";
-          confetti.style.left = Math.random() * 100 + "vw";
-          confetti.style.top = "-10px";
-          confetti.style.width = "10px";
-          confetti.style.height = "10px";
-          confetti.style.background = ["#e62429", "#00bfff", "#ffd700", "#00ff88"][Math.floor(Math.random()*4)];
-          confetti.style.opacity = Math.random() + 0.5;
-          confetti.style.transform = `rotate(${Math.random()*360}deg)`;
-          document.body.appendChild(confetti);
+    function startTimer() {
+      timeLeft = 20;
+      document.getElementById("timer").textContent = timeLeft;
+      document.getElementById("timer-bar").style.width = "100%";
 
-          let y = -10;
-          const fall = setInterval(() => {
-            y += 8 + Math.random() * 6;
-            confetti.style.top = y + "px";
-            if (y > window.innerHeight) {
-              clearInterval(fall);
-              confetti.remove();
-            }
-          }, 20);
-        }, i * 3);
-      }
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").textContent = timeLeft;
+        document.getElementById("timer-bar").style.width = (timeLeft / 20 * 100) + "%";
+
+        if (timeLeft <= 5) document.getElementById("timer").style.color = "#ff4444";
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          // Time out - move to next
+          const buttons = document.querySelectorAll(".answer-btn");
+          buttons.forEach(b => b.disabled = true);
+          document.getElementById("next-btn").style.display = "inline-block";
+        }
+      }, 1000);
     }
 
     function shuffle(array) {
@@ -240,7 +200,6 @@
       currentQuestions = shuffle([...questionsDB]).slice(0, 3);
       currentIndex = 0;
       score = 0;
-      body.classList.remove("loser-mode");
       document.getElementById("result").style.display = "none";
       document.getElementById("quiz").style.display = "block";
       document.getElementById("next-btn").style.display = "none";
@@ -262,9 +221,12 @@
         btn.onclick = () => checkAnswer(i, q.correct);
         optionsDiv.appendChild(btn);
       });
+
+      startTimer();
     }
 
     function checkAnswer(selected, correct) {
+      clearInterval(timerInterval);
       if (selected === correct) score++;
       
       const buttons = document.querySelectorAll(".answer-btn");
@@ -278,6 +240,7 @@
     }
 
     function nextQuestion() {
+      clearInterval(timerInterval);
       currentIndex++;
       if (currentIndex < 3) {
         showQuestion();
@@ -289,35 +252,46 @@
     }
 
     function endQuiz() {
+      clearInterval(timerInterval);
       document.getElementById("quiz").style.display = "none";
       const resultDiv = document.getElementById("result");
       resultDiv.style.display = "block";
 
-      let message = "";
-      let emoji = "";
-
-      if (score === 3) {
-        message = "🦸‍♂️ Perfect score! You're a true MCU Master!";
-        emoji = "🎉";
-        launchConfetti();
-      } else if (score === 2) {
-        message = "👍 Great job! Almost a perfect run!";
-        emoji = "🔥";
-      } else if (score === 1) {
-        message = "🍿 Not bad — time for a rewatch marathon!";
-        emoji = "📺";
-      } else {
-        message = "Time to binge the entire saga again!";
-        emoji = "😢";
-        body.classList.add("loser-mode");   // Shake effect for 0/3
-      }
+      let message = score === 3 ? "🦸‍♂️ Perfect score! You're a true MCU Master!" :
+                    score === 2 ? "👍 Great job! Almost a perfect run!" :
+                    score === 1 ? "🍿 Not bad — time for a rewatch marathon!" :
+                    "Time to binge the entire saga again!";
 
       resultDiv.innerHTML = `
-        <h2>Quiz Complete! ${emoji}</h2>
+        <h2>Quiz Complete!</h2>
         <p>Your score: <strong>${score}/3</strong></p>
         <p>${message}</p>
         <button onclick="startQuiz()" style="background:#00bfff; padding:18px 45px; font-size:1.35em;">Play Again</button>
       `;
+
+      if (score === 3) launchConfetti();   // Reuse confetti if you still have it from previous version
+    }
+
+    // Simple confetti (kept light)
+    function launchConfetti() {
+      for (let i = 0; i < 120; i++) {
+        setTimeout(() => {
+          const c = document.createElement("div");
+          c.style.position = "fixed";
+          c.style.left = Math.random() * 100 + "vw";
+          c.style.top = "-10px";
+          c.style.width = "10px";
+          c.style.height = "10px";
+          c.style.background = "#e62429";
+          document.body.appendChild(c);
+          let y = -10;
+          const fall = setInterval(() => {
+            y += 10;
+            c.style.top = y + "px";
+            if (y > window.innerHeight) { clearInterval(fall); c.remove(); }
+          }, 20);
+        }, i * 4);
+      }
     }
 
     window.onload = startQuiz;
