@@ -27,21 +27,34 @@
       box-shadow: 0 0 30px rgba(230, 36, 41, 0.5);
     }
 
-    h1 { font-family: 'Impact', sans-serif; color: #e62429; font-size: 2.9em; margin: 10px 0 8px; text-shadow: 0 0 20px #e62429; }
+    h1 { 
+      font-family: 'Impact', sans-serif; 
+      color: #e62429; 
+      font-size: 2.9em; 
+      margin: 10px 0 8px; 
+      text-shadow: 0 0 20px #e62429; 
+    }
     p { font-size: 1.2em; color: #ddd; margin-bottom: 15px; }
 
-    #timer-bar {
-      height: 8px;
-      background: #e62429;
-      width: 100%;
-      margin-bottom: 15px;
-      border-radius: 4px;
-      transition: width 0.2s linear;
+    #music-btn {
+      background: #00bfff;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.25em;
+      border-radius: 50px;
+      margin: 15px auto;
+      display: block;
+      cursor: pointer;
     }
 
-    #time-left { font-size: 1.1em; color: #ffcc00; margin-bottom: 8px; }
-
-    .question { font-size: 1.65em; margin: 25px 0 20px; min-height: 110px; line-height: 1.35; }
+    .progress { font-size: 1.25em; color: #ccc; margin-bottom: 12px; }
+    .question { 
+      font-size: 1.65em; 
+      margin: 35px 0 25px; 
+      min-height: 110px; 
+      line-height: 1.35; 
+    }
 
     button.answer-btn {
       background: #e62429;
@@ -54,11 +67,15 @@
       border-radius: 12px;
       min-width: 300px;
       display: block;
+      transition: all 0.25s;
     }
 
-    button.answer-btn:hover { background: #ff2d33; transform: scale(1.04); }
+    button.answer-btn:hover { 
+      background: #ff2d33; 
+      transform: scale(1.04); 
+    }
     button.answer-btn:disabled { background: #555; }
-    .correct { background: #00cc00 !important; }
+    .correct { background: #00cc00 !important; box-shadow: 0 0 15px #00ff88; }
 
     #result { font-size: 1.8em; margin: 40px 0; }
   </style>
@@ -66,7 +83,7 @@
 <body>
   <div class="container">
     <h1>MCU QUIZ CHALLENGE</h1>
-    <p>Answer fast — 20 seconds per question!</p>
+    <p>Test your knowledge of the Marvel Cinematic Universe</p>
     
     <button id="music-btn" onclick="toggleMusic()">🎵 Play Epic Music</button>
     
@@ -75,8 +92,6 @@
     </audio>
 
     <div id="quiz">
-      <div id="time-left">Time left: <span id="timer">20</span>s</div>
-      <div id="timer-bar"></div>
       <div class="progress">Question <span id="q-num">1</span>/3</div>
       <div class="question" id="question-text"></div>
       <div id="options"></div>
@@ -87,7 +102,7 @@
   </div>
 
   <script>
-    const questionsDB = [ /* Your full 60 questions - same as last working version */ 
+    const questionsDB = [
       { q: "What is the name of Thor's hammer?", a: ["Mjolnir", "Stormbreaker", "Gungnir", "Axe of the All-Father"], correct: 0 },
       { q: "Who is the Winter Soldier?", a: ["Bucky Barnes", "Steve Rogers", "Sam Wilson", "Clint Barton"], correct: 0 },
       { q: "In what year was the first Iron Man movie released?", a: ["2008", "2010", "2012", "2005"], correct: 0 },
@@ -149,11 +164,9 @@
       { q: "What is the name of the dragon-like creature in Shang-Chi?", a: ["The Great Protector", "Fin Fang Foom", "Dormammu", "Surtur"], correct: 0 }
     ];
 
- let currentQuestions = [];
+    let currentQuestions = [];
     let currentIndex = 0;
     let score = 0;
-    let timeLeft = 20;
-    let timerInterval;
     let isPlaying = false;
     const audio = document.getElementById("bgmusic");
     const musicBtn = document.getElementById("music-btn");
@@ -163,33 +176,10 @@
         audio.pause();
         musicBtn.textContent = "🎵 Play Epic Music";
       } else {
-        audio.play().then(() => musicBtn.textContent = "⏸ Pause Music");
+        audio.play().then(() => musicBtn.textContent = "⏸ Pause Music")
+                   .catch(() => musicBtn.textContent = "🎵 Tap again");
       }
       isPlaying = !isPlaying;
-    }
-
-    function startTimer() {
-      timeLeft = 20;
-      document.getElementById("timer").textContent = timeLeft;
-      document.getElementById("timer-bar").style.width = "100%";
-
-      if (timerInterval) clearInterval(timerInterval);
-
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById("timer").textContent = timeLeft;
-        document.getElementById("timer-bar").style.width = (timeLeft / 20 * 100) + "%";
-
-        if (timeLeft <= 5) document.getElementById("timer").style.color = "#ff4444";
-
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          // Time out - move to next
-          const buttons = document.querySelectorAll(".answer-btn");
-          buttons.forEach(b => b.disabled = true);
-          document.getElementById("next-btn").style.display = "inline-block";
-        }
-      }, 1000);
     }
 
     function shuffle(array) {
@@ -213,34 +203,38 @@
       
       const optionsDiv = document.getElementById("options");
       optionsDiv.innerHTML = "";
-      
-      q.a.forEach((answer, i) => {
+
+      // Shuffle the answers
+      let shuffled = [...q.a];
+      shuffled = shuffle(shuffled);
+
+      shuffled.forEach(answer => {
         const btn = document.createElement("button");
         btn.textContent = answer;
         btn.className = "answer-btn";
-        btn.onclick = () => checkAnswer(i, q.correct);
+        btn.onclick = () => checkAnswer(answer, q.a[q.correct]);
         optionsDiv.appendChild(btn);
       });
-
-      startTimer();
     }
 
-    function checkAnswer(selected, correct) {
-      clearInterval(timerInterval);
-      if (selected === correct) score++;
+    function checkAnswer(selectedText, correctText) {
+      if (selectedText === correctText) score++;
       
       const buttons = document.querySelectorAll(".answer-btn");
-      buttons.forEach((b, i) => {
-        b.disabled = true;
-        if (i === correct) b.classList.add("correct");
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === correctText) {
+          btn.classList.add("correct");
+        }
       });
       
       document.getElementById("next-btn").style.display = "inline-block";
-      if (currentIndex === 2) document.getElementById("next-btn").textContent = "See Your Score!";
+      if (currentIndex === 2) {
+        document.getElementById("next-btn").textContent = "See Your Score!";
+      }
     }
 
     function nextQuestion() {
-      clearInterval(timerInterval);
       currentIndex++;
       if (currentIndex < 3) {
         showQuestion();
@@ -252,11 +246,10 @@
     }
 
     function endQuiz() {
-      clearInterval(timerInterval);
       document.getElementById("quiz").style.display = "none";
       const resultDiv = document.getElementById("result");
       resultDiv.style.display = "block";
-
+      
       let message = score === 3 ? "🦸‍♂️ Perfect score! You're a true MCU Master!" :
                     score === 2 ? "👍 Great job! Almost a perfect run!" :
                     score === 1 ? "🍿 Not bad — time for a rewatch marathon!" :
@@ -268,30 +261,6 @@
         <p>${message}</p>
         <button onclick="startQuiz()" style="background:#00bfff; padding:18px 45px; font-size:1.35em;">Play Again</button>
       `;
-
-      if (score === 3) launchConfetti();   // Reuse confetti if you still have it from previous version
-    }
-
-    // Simple confetti (kept light)
-    function launchConfetti() {
-      for (let i = 0; i < 120; i++) {
-        setTimeout(() => {
-          const c = document.createElement("div");
-          c.style.position = "fixed";
-          c.style.left = Math.random() * 100 + "vw";
-          c.style.top = "-10px";
-          c.style.width = "10px";
-          c.style.height = "10px";
-          c.style.background = "#e62429";
-          document.body.appendChild(c);
-          let y = -10;
-          const fall = setInterval(() => {
-            y += 10;
-            c.style.top = y + "px";
-            if (y > window.innerHeight) { clearInterval(fall); c.remove(); }
-          }, 20);
-        }, i * 4);
-      }
     }
 
     window.onload = startQuiz;
