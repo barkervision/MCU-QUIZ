@@ -1,267 +1,864 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MCU Quiz Challenge</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Impact:wght@400;700&family=Roboto:wght@400;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCU Quiz Challenge</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e62429;
+    --red-glow: rgba(230, 36, 41, 0.6);
+    --gold: #f0b429;
+    --dark: #0a0a0f;
+    --card: rgba(10,10,20,0.85);
+    --correct: #00e676;
+    --wrong: #ff1744;
+  }
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding: 15px 10px;
-      min-height: 100vh;
-      background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), 
-                  url('https://picsum.photos/id/1015/1920/1080') center/cover no-repeat fixed;
-      color: #fff;
-      text-align: center;
-    }
+- { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 18px;
-      padding: 25px 20px;
-      box-shadow: 0 0 30px rgba(230, 36, 41, 0.5);
-    }
+body {
+font-family: ‘Barlow’, sans-serif;
+min-height: 100vh;
+background: var(–dark);
+color: #fff;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow-x: hidden;
+position: relative;
+}
 
-    h1 { 
-      font-family: 'Impact', sans-serif; 
-      color: #e62429; 
-      font-size: 2.9em; 
-      margin: 10px 0 8px; 
-      text-shadow: 0 0 20px #e62429; 
-    }
-    p { font-size: 1.2em; color: #ddd; margin-bottom: 15px; }
+.bg {
+position: fixed;
+inset: 0;
+background:
+radial-gradient(ellipse 80% 60% at 20% 10%, rgba(230,36,41,0.18) 0%, transparent 60%),
+radial-gradient(ellipse 60% 80% at 80% 90%, rgba(0,100,200,0.12) 0%, transparent 60%),
+radial-gradient(ellipse 100% 100% at 50% 50%, #0a0a1a 0%, #000 100%);
+z-index: 0;
+}
 
-    #music-btn {
-      background: #00bfff;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      font-size: 1.25em;
-      border-radius: 50px;
-      margin: 15px auto;
-      display: block;
-      cursor: pointer;
-    }
+.bg::after {
+content: ‘’;
+position: fixed;
+inset: 0;
+background-image:
+repeating-linear-gradient(60deg, rgba(230,36,41,0.03) 0px, transparent 1px, transparent 60px),
+repeating-linear-gradient(-60deg, rgba(230,36,41,0.03) 0px, transparent 1px, transparent 60px),
+repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, transparent 1px, transparent 60px);
+z-index: 0;
+}
 
-    .progress { font-size: 1.25em; color: #ccc; margin-bottom: 12px; }
-    .question { 
-      font-size: 1.65em; 
-      margin: 35px 0 25px; 
-      min-height: 110px; 
-      line-height: 1.35; 
-    }
+.container {
+position: relative;
+z-index: 1;
+width: 100%;
+max-width: 680px;
+margin: 20px auto;
+padding: 0 16px;
+}
 
-    button.answer-btn {
-      background: #e62429;
-      color: white;
-      border: none;
-      padding: 18px 30px;
-      margin: 10px auto;
-      font-size: 1.2em;
-      cursor: pointer;
-      border-radius: 12px;
-      min-width: 300px;
-      display: block;
-      transition: all 0.25s;
-    }
+.screen {
+background: var(–card);
+border: 1px solid rgba(230,36,41,0.3);
+border-radius: 4px;
+padding: 40px 36px;
+box-shadow: 0 0 60px rgba(230,36,41,0.2), 0 0 120px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+backdrop-filter: blur(20px);
+animation: fadeIn 0.4s ease;
+}
 
-    button.answer-btn:hover { 
-      background: #ff2d33; 
-      transform: scale(1.04); 
-    }
-    button.answer-btn:disabled { background: #555; }
-    .correct { background: #00cc00 !important; box-shadow: 0 0 15px #00ff88; }
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(12px); }
+to { opacity: 1; transform: translateY(0); }
+}
 
-    #result { font-size: 1.8em; margin: 40px 0; }
-  </style>
+.logo-wrap { text-align: center; margin-bottom: 28px; }
+
+.logo-badge {
+display: inline-block;
+background: var(–red);
+color: white;
+font-family: ‘Bebas Neue’, cursive;
+font-size: 0.9em;
+letter-spacing: 4px;
+padding: 4px 14px;
+margin-bottom: 8px;
+clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+
+h1 {
+font-family: ‘Bebas Neue’, cursive;
+font-size: 3.8em;
+letter-spacing: 4px;
+line-height: 0.9;
+color: #fff;
+text-shadow: 0 0 40px var(–red-glow), 0 0 80px rgba(230,36,41,0.3);
+}
+
+h1 span { color: var(–red); }
+
+.tagline {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 1em;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.4);
+margin-top: 6px;
+}
+
+.mode-label {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 0.8em;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.4);
+margin: 28px 0 12px;
+}
+
+.mode-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+margin-bottom: 28px;
+}
+
+.mode-btn {
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 4px;
+padding: 14px 8px;
+cursor: pointer;
+color: #fff;
+text-align: center;
+transition: all 0.2s;
+font-family: ‘Barlow Condensed’, sans-serif;
+}
+
+.mode-btn .num {
+font-family: ‘Bebas Neue’, cursive;
+font-size: 2.2em;
+line-height: 1;
+color: rgba(255,255,255,0.5);
+display: block;
+transition: color 0.2s;
+}
+
+.mode-btn .lbl {
+font-size: 0.75em;
+letter-spacing: 2px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.3);
+display: block;
+margin-top: 2px;
+}
+
+.mode-btn:hover, .mode-btn.active {
+border-color: var(–red);
+background: rgba(230,36,41,0.12);
+box-shadow: 0 0 20px rgba(230,36,41,0.2);
+}
+
+.mode-btn.active .num { color: var(–red); }
+.mode-btn.active .lbl { color: rgba(255,255,255,0.6); }
+
+.btn-primary {
+width: 100%;
+background: var(–red);
+color: white;
+border: none;
+padding: 18px;
+font-family: ‘Bebas Neue’, cursive;
+font-size: 1.5em;
+letter-spacing: 3px;
+cursor: pointer;
+border-radius: 3px;
+transition: all 0.2s;
+position: relative;
+overflow: hidden;
+clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+}
+
+.btn-primary::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+transform: translateX(-100%);
+transition: transform 0.4s;
+}
+
+.btn-primary:hover { background: #ff2d33; box-shadow: 0 0 30px var(–red-glow); }
+.btn-primary:hover::after { transform: translateX(100%); }
+
+/* Music row */
+.music-row {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 20px;
+}
+
+.music-toggle {
+background: rgba(255,255,255,0.06);
+border: 1px solid rgba(255,255,255,0.12);
+color: rgba(255,255,255,0.5);
+border-radius: 3px;
+padding: 8px 16px;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 0.8em;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.music-toggle:hover, .music-toggle.on {
+border-color: var(–gold);
+color: var(–gold);
+background: rgba(240,180,41,0.08);
+}
+
+/* Quiz screen */
+.progress-bar-wrap { margin-bottom: 24px; }
+
+.progress-meta {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 8px;
+}
+
+.q-counter {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 0.8em;
+letter-spacing: 3px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.4);
+}
+
+.score-display {
+font-family: ‘Bebas Neue’, cursive;
+font-size: 1.3em;
+color: var(–gold);
+letter-spacing: 2px;
+}
+
+.progress-bar {
+height: 3px;
+background: rgba(255,255,255,0.08);
+border-radius: 2px;
+overflow: hidden;
+}
+
+.progress-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–red), #ff6b6b);
+border-radius: 2px;
+transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 0 8px var(–red-glow);
+}
+
+.timer-wrap {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 20px;
+}
+
+.timer-bar {
+flex: 1;
+height: 6px;
+background: rgba(255,255,255,0.08);
+border-radius: 3px;
+overflow: hidden;
+}
+
+.timer-fill {
+height: 100%;
+background: var(–gold);
+border-radius: 3px;
+transition: width 1s linear, background 0.5s;
+box-shadow: 0 0 8px rgba(240,180,41,0.5);
+}
+
+.timer-fill.urgent { background: var(–red); box-shadow: 0 0 8px var(–red-glow); }
+
+.timer-num {
+font-family: ‘Bebas Neue’, cursive;
+font-size: 1.4em;
+color: var(–gold);
+width: 30px;
+text-align: right;
+transition: color 0.3s;
+}
+
+.timer-num.urgent { color: var(–red); }
+
+.question-text {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 1.6em;
+font-weight: 600;
+line-height: 1.3;
+min-height: 80px;
+margin-bottom: 28px;
+color: #fff;
+}
+
+.options {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-bottom: 20px;
+}
+
+.answer-btn {
+background: rgba(255,255,255,0.05);
+border: 1px solid rgba(255,255,255,0.12);
+color: #fff;
+padding: 16px 14px;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 1.05em;
+font-weight: 600;
+cursor: pointer;
+border-radius: 4px;
+text-align: left;
+transition: all 0.18s;
+line-height: 1.3;
+}
+
+.answer-btn:hover:not(:disabled) {
+border-color: rgba(255,255,255,0.35);
+background: rgba(255,255,255,0.1);
+transform: translateY(-1px);
+}
+
+.answer-btn:disabled { cursor: default; }
+
+.answer-btn.correct {
+background: rgba(0,230,118,0.15) !important;
+border-color: var(–correct) !important;
+color: var(–correct) !important;
+box-shadow: 0 0 20px rgba(0,230,118,0.2);
+transform: none;
+}
+
+.answer-btn.wrong {
+background: rgba(255,23,68,0.15) !important;
+border-color: var(–wrong) !important;
+color: var(–wrong) !important;
+}
+
+.answer-btn.dimmed { opacity: 0.35; }
+
+.next-wrap { text-align: right; min-height: 50px; }
+
+.btn-next {
+background: transparent;
+border: 1px solid rgba(255,255,255,0.2);
+color: rgba(255,255,255,0.7);
+padding: 12px 28px;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 0.9em;
+letter-spacing: 3px;
+text-transform: uppercase;
+cursor: pointer;
+border-radius: 3px;
+transition: all 0.2s;
+display: none;
+}
+
+.btn-next.visible { display: inline-block; }
+.btn-next:hover { border-color: var(–red); color: var(–red); background: rgba(230,36,41,0.08); }
+
+/* Result screen */
+.result-shield { text-align: center; margin-bottom: 28px; }
+
+.result-score {
+font-family: ‘Bebas Neue’, cursive;
+font-size: 7em;
+line-height: 1;
+color: var(–red);
+text-shadow: 0 0 40px var(–red-glow);
+display: block;
+}
+
+.result-total {
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 1em;
+letter-spacing: 4px;
+text-transform: uppercase;
+color: rgba(255,255,255,0.35);
+}
+
+.result-title {
+font-family: ‘Bebas Neue’, cursive;
+font-size: 2.2em;
+letter-spacing: 2px;
+margin: 12px 0 6px;
+}
+
+.result-msg {
+color: rgba(255,255,255,0.6);
+font-size: 1em;
+line-height: 1.5;
+margin-bottom: 24px;
+}
+
+.result-breakdown {
+border-top: 1px solid rgba(255,255,255,0.08);
+padding-top: 20px;
+margin-bottom: 24px;
+}
+
+.breakdown-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px solid rgba(255,255,255,0.04);
+font-size: 0.9em;
+gap: 12px;
+}
+
+.breakdown-q {
+color: rgba(255,255,255,0.6);
+flex: 1;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 1em;
+}
+
+.breakdown-icon { font-size: 1.1em; flex-shrink: 0; }
+
+.result-actions {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.btn-secondary {
+background: transparent;
+border: 1px solid rgba(255,255,255,0.15);
+color: rgba(255,255,255,0.6);
+padding: 14px;
+font-family: ‘Barlow Condensed’, sans-serif;
+font-size: 0.85em;
+letter-spacing: 2px;
+text-transform: uppercase;
+cursor: pointer;
+border-radius: 3px;
+transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: rgba(255,255,255,0.4); color: #fff; }
+
+.feedback-flash {
+position: fixed;
+inset: 0;
+pointer-events: none;
+z-index: 999;
+opacity: 0;
+transition: opacity 0.15s;
+}
+
+.feedback-flash.correct-flash { background: rgba(0,230,118,0.08); }
+.feedback-flash.wrong-flash { background: rgba(255,23,68,0.1); }
+.feedback-flash.show { opacity: 1; }
+
+@media (max-width: 500px) {
+.screen { padding: 28px 20px; }
+h1 { font-size: 2.8em; }
+.options { grid-template-columns: 1fr; }
+.result-actions { grid-template-columns: 1fr; }
+}
+</style>
+
 </head>
 <body>
-  <div class="container">
-    <h1>MCU QUIZ CHALLENGE</h1>
-    <p>Test your knowledge of the Marvel Cinematic Universe</p>
-    
-    <button id="music-btn" onclick="toggleMusic()">🎵 Play Epic Music</button>
-    
-    <audio id="bgmusic" loop>
-      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" type="audio/mpeg">
-    </audio>
 
-    <div id="quiz">
-      <div class="progress">Question <span id="q-num">1</span>/3</div>
-      <div class="question" id="question-text"></div>
-      <div id="options"></div>
+<div class="bg"></div>
+<div class="feedback-flash" id="feedbackFlash"></div>
+
+<div class="container">
+
+  <!-- START SCREEN -->
+
+  <div class="screen" id="startScreen">
+    <div class="logo-wrap">
+      <div class="logo-badge">MARVEL</div>
+      <h1>MCU<br><span>QUIZ</span></h1>
+      <div class="tagline">Test Your Universe</div>
     </div>
-    
-    <div id="result" style="display:none;"></div>
-    <button id="next-btn" style="display:none; margin-top:25px; padding:16px 40px; font-size:1.3em;" onclick="nextQuestion()">Next Question</button>
+
+```
+<div class="music-row">
+  <button class="music-toggle" id="musicBtn" onclick="toggleMusic()">🎵 Epic Music: OFF</button>
+</div>
+
+<div class="mode-label">Choose your challenge</div>
+<div class="mode-grid">
+  <button class="mode-btn active" onclick="selectMode(this, 3)">
+    <span class="num">3</span>
+    <span class="lbl">Quick</span>
+  </button>
+  <button class="mode-btn" onclick="selectMode(this, 5)">
+    <span class="num">5</span>
+    <span class="lbl">Standard</span>
+  </button>
+  <button class="mode-btn" onclick="selectMode(this, 10)">
+    <span class="num">10</span>
+    <span class="lbl">Hero</span>
+  </button>
+</div>
+
+<button class="btn-primary" onclick="startQuiz()">⚡ START QUIZ</button>
+```
+
   </div>
 
-  <script>
-    const questionsDB = [
-      { q: "What is the name of Thor's hammer?", a: ["Mjolnir", "Stormbreaker", "Gungnir", "Axe of the All-Father"], correct: 0 },
-      { q: "Who is the Winter Soldier?", a: ["Bucky Barnes", "Steve Rogers", "Sam Wilson", "Clint Barton"], correct: 0 },
-      { q: "In what year was the first Iron Man movie released?", a: ["2008", "2010", "2012", "2005"], correct: 0 },
-      { q: "What is Captain America's shield made of?", a: ["Vibranium", "Adamantium", "Uru", "Titanium"], correct: 0 },
-      { q: "Who said the line 'I am Groot'?", a: ["Groot", "Rocket Raccoon", "Drax", "Yondu"], correct: 0 },
-      { q: "What is Black Widow's real name?", a: ["Natasha Romanoff", "Wanda Maximoff", "Maria Hill", "Yelena Belova"], correct: 0 },
-      { q: "Which Infinity Stone was housed in the Tesseract?", a: ["Space Stone", "Mind Stone", "Power Stone", "Soul Stone"], correct: 0 },
-      { q: "Who plays Spider-Man in the MCU?", a: ["Tom Holland", "Andrew Garfield", "Tobey Maguire", "Miles Morales (voice)"], correct: 0 },
-      { q: "What planet is Thanos from?", a: ["Titan", "Xandar", "Morag", "Vormir"], correct: 0 },
-      { q: "Which Avenger can shrink to tiny size?", a: ["Ant-Man", "Hulk", "Falcon", "Vision"], correct: 0 },
-      { q: "What is the name of Tony Stark's AI assistant in the early movies?", a: ["JARVIS", "FRIDAY", "ULTRON", "VISION"], correct: 0 },
-      { q: "Who directed the first Avengers movie?", a: ["Joss Whedon", "James Gunn", "Taika Waititi", "Ryan Coogler"], correct: 0 },
-      { q: "What does S.H.I.E.L.D. stand for?", a: ["Strategic Homeland Intervention, Enforcement and Logistics Division", "Super Hero Intelligence Enforcement League Division", "Strategic Heroes In Extreme Life Defense", "Secret Homeland Intelligence Enforcement League"], correct: 0 },
-      { q: "How many Infinity Stones are there?", a: ["6", "5", "7", "4"], correct: 0 },
-      { q: "What color is the Power Stone?", a: ["Purple", "Blue", "Red", "Orange"], correct: 0 },
-      { q: "Who is the God of Mischief?", a: ["Loki", "Thor", "Odin", "Heimdall"], correct: 0 },
-      { q: "What is the name of Doctor Strange's cloak?", a: ["Cloak of Levitation", "Crimson Bands of Cyttorak", "Eye of Agamotto Cape", "Sorcerer Supreme Robe"], correct: 0 },
-      { q: "In which movie did Black Panther first appear?", a: ["Captain America: Civil War", "Black Panther", "Avengers: Infinity War", "Avengers: Age of Ultron"], correct: 0 },
-      { q: "What is the real name of the Scarlet Witch?", a: ["Wanda Maximoff", "Agatha Harkness", "Monica Rambeau", "Darcy Lewis"], correct: 0 },
-      { q: "Who played the Hulk in the 2008 Incredible Hulk movie?", a: ["Edward Norton", "Mark Ruffalo", "Eric Bana", "Lou Ferrigno (voice)"], correct: 0 },
-      { q: "What is Star-Lord's real name?", a: ["Peter Quill", "Peter Parker", "Scott Lang", "Tony Stark"], correct: 0 },
-      { q: "Who says 'Avengers... assemble!' in Endgame?", a: ["Captain America", "Iron Man", "Thor", "Black Panther"], correct: 0 },
-      { q: "What is the name of Wakanda's king in the MCU?", a: ["T'Challa", "M'Baku", "Killmonger", "Okoye"], correct: 0 },
-      { q: "Which movie features the line 'I love you 3000'?", a: ["Avengers: Endgame", "Avengers: Infinity War", "Iron Man 3", "Spider-Man: Far From Home"], correct: 0 },
-      { q: "What is the name of the main villain in Doctor Strange?", a: ["Kaecilius", "Dormammu", "Baron Mordo", "The Ancient One"], correct: 0 },
-      { q: "Who is Gamora's adoptive father?", a: ["Thanos", "Ronan", "Ego", "Yondu"], correct: 0 },
-      { q: "What weapon does Hawkeye primarily use?", a: ["Bow and Arrow", "Sniper Rifle", "Sword", "Shield"], correct: 0 },
-      { q: "In which movie do the Guardians of the Galaxy first appear?", a: ["Guardians of the Galaxy", "Avengers: Infinity War", "Thor: Ragnarok", "Captain Marvel"], correct: 0 },
-      { q: "What is the name of Tony Stark's daughter?", a: ["Morgan", "Pepper", "Harley", "Cassie"], correct: 0 },
-      { q: "Who becomes the new Captain America in Falcon and the Winter Soldier?", a: ["Sam Wilson", "Bucky Barnes", "John Walker", "Isaiah Bradley"], correct: 0 },
-      { q: "What is the first song played in Guardians of the Galaxy Vol. 1?", a: ["Come and Get Your Love", "Mr. Blue Sky", "Hooked on a Feeling", "I Want You Back"], correct: 0 },
-      { q: "Which character can phase through walls?", a: ["Vision", "Ghost", "America Chavez", "Monica Rambeau"], correct: 1 },
-      { q: "What is the name of the building where the Avengers first assemble?", a: ["Stark Tower", "Avengers Tower", "Triskelion", "Sanctum Sanctorum"], correct: 1 },
-      { q: "Who kills Thanos with the sword in Endgame?", a: ["Thor", "Captain Marvel", "Scarlet Witch", "Iron Man"], correct: 2 },
-      { q: "What planet does Thor go to in Ragnarok?", a: ["Sakaar", "Asgard", "Nidavellir", "Xandar"], correct: 0 },
-      { q: "What is the name of the AI that becomes Ultron?", a: ["Ultron", "Vision", "JARVIS", "FRIDAY"], correct: 0 },
-      { q: "Who is the sorcerer supreme before Doctor Strange?", a: ["The Ancient One", "Wong", "Mordo", "Kaecilius"], correct: 0 },
-      { q: "What does Loki transform into in the first Thor movie to escape?", a: ["A snake", "A bird", "A guard", "Captain America"], correct: 0 },
-      { q: "Which Infinity Stone gives reality warping powers?", a: ["Reality Stone (Aether)", "Mind Stone", "Time Stone", "Power Stone"], correct: 0 },
-      { q: "What is the name of the airport battle in Civil War?", a: ["Leipzig-Halle Airport", "JFK Airport", "LAX Airport", "Heathrow Airport"], correct: 0 },
-      { q: "Who plays Loki in the MCU?", a: ["Tom Hiddleston", "Chris Hemsworth", "Idris Elba", "Anthony Hopkins"], correct: 0 },
-      { q: "What is the name of the metal in Black Panther's suit?", a: ["Vibranium", "Adamantium", "Uru", "Carbonadium"], correct: 0 },
-      { q: "Which movie introduced the character Shang-Chi?", a: ["Shang-Chi and the Legend of the Ten Rings", "Eternals", "Doctor Strange 2", "Spider-Man: No Way Home"], correct: 0 },
-      { q: "What is the name of Vision's wife?", a: ["Wanda Maximoff", "Agatha Harkness", "Monica Rambeau", "Darcy Lewis"], correct: 0 },
-      { q: "Who says 'I'm always angry'?", a: ["Bruce Banner", "Tony Stark", "Thor", "Steve Rogers"], correct: 0 },
-      { q: "What is the name of the ship used by the Guardians?", a: ["Milano", "Benatar", "Knowhere", "Sanctuary II"], correct: 0 },
-      { q: "In which movie does Captain Marvel first appear?", a: ["Captain Marvel", "Avengers: Endgame", "Avengers: Infinity War", "Thor: Ragnarok"], correct: 0 },
-      { q: "What is the name of the villain in Black Panther?", a: ["Killmonger", "Klau", "M'Baku", "T'Challa"], correct: 0 },
-      { q: "Who is the leader of the Dora Milaje?", a: ["Okoye", "Ayo", "Shuri", "Nakia"], correct: 0 },
-      { q: "What year does Avengers: Endgame take place mainly in?", a: ["2023", "2018", "2025", "2012"], correct: 0 },
-      { q: "What is the name of Peter Quill's father?", a: ["Ego", "Yondu", "Ronan", "Thanos"], correct: 0 },
-      { q: "Which character has the Time Stone?", a: ["Doctor Strange", "Wong", "Ancient One", "Dormammu"], correct: 0 },
-      { q: "What is the name of the compound where the Avengers live in Age of Ultron?", a: ["Avengers Compound", "Stark Tower", "Triskelion", "Wakanda"], correct: 0 },
-      { q: "Who plays Nebula?", a: ["Karen Gillan", "Pom Klementieff", "Zoe Saldana", "Elizabeth Olsen"], correct: 0 },
-      { q: "What is the name of the event where half the universe disappears?", a: ["The Blip", "The Snap", "The Decimation", "All of the above"], correct: 3 },
-      { q: "Which actor played both Iron Man and voiced Ultron?", a: ["Robert Downey Jr.", "James Spader", "Chris Evans", "Mark Ruffalo"], correct: 0 },
-      { q: "What is the name of Scott Lang's daughter?", a: ["Cassie", "Morgan", "Harley", "Pepper"], correct: 0 },
-      { q: "In which movie does Thor lose his eye?", a: ["Thor: Ragnarok", "Avengers: Infinity War", "Thor: The Dark World", "Avengers: Endgame"], correct: 0 },
-      { q: "What is the name of the dragon-like creature in Shang-Chi?", a: ["The Great Protector", "Fin Fang Foom", "Dormammu", "Surtur"], correct: 0 }
-    ];
+  <!-- QUIZ SCREEN -->
 
-    let currentQuestions = [];
-    let currentIndex = 0;
-    let score = 0;
-    let isPlaying = false;
-    const audio = document.getElementById("bgmusic");
-    const musicBtn = document.getElementById("music-btn");
+  <div class="screen" id="quizScreen" style="display:none;">
+    <div class="progress-bar-wrap">
+      <div class="progress-meta">
+        <span class="q-counter">Question <span id="qNum">1</span> of <span id="qTotal">3</span></span>
+        <span class="score-display">✦ <span id="scoreLive">0</span> pts</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
 
-    function toggleMusic() {
-      if (isPlaying) {
-        audio.pause();
-        musicBtn.textContent = "🎵 Play Epic Music";
-      } else {
-        audio.play().then(() => musicBtn.textContent = "⏸ Pause Music")
-                   .catch(() => musicBtn.textContent = "🎵 Tap again");
-      }
-      isPlaying = !isPlaying;
+```
+<div class="timer-wrap">
+  <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+  <div class="timer-num" id="timerNum">15</div>
+</div>
+
+<div class="question-text" id="questionText"></div>
+<div class="options" id="options"></div>
+
+<div class="next-wrap">
+  <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
+</div>
+```
+
+  </div>
+
+  <!-- RESULT SCREEN -->
+
+  <div class="screen" id="resultScreen" style="display:none;">
+    <div class="logo-wrap" style="margin-bottom:20px;">
+      <div class="logo-badge">RESULTS</div>
+    </div>
+    <div class="result-shield">
+      <span class="result-score" id="resultScore">0</span>
+      <div class="result-total" id="resultTotal">out of 3 correct</div>
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-msg" id="resultMsg"></div>
+    </div>
+    <div class="result-breakdown" id="breakdown"></div>
+    <div class="result-actions">
+      <button class="btn-secondary" onclick="goHome()">↩ Change Mode</button>
+      <button class="btn-primary" onclick="startQuiz()">↺ Play Again</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     AUDIO
+     Place theme.mp3 in the same folder as this index.html file
+     in your GitHub repo. That's all you need to do.
+     ============================================================ -->
+
+<audio id="bgmusic" loop>
+  <source src="theme.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+/* ============================================================
+   QUESTIONS DATABASE
+   This is the section to edit when adding new questions.
+   Future plan: move this to its own file called questions.js
+   Format: { q: "Question text", a: ["Option1","Option2","Option3","Option4"], correct: INDEX }
+   correct: INDEX = which item in the array above is right (0 = first item)
+   ============================================================ */
+const questionsDB = [
+  { q: "What is the name of Thor's hammer?", a: ["Mjolnir", "Stormbreaker", "Gungnir", "Axe of the All-Father"], correct: 0 },
+  { q: "Who is the Winter Soldier?", a: ["Bucky Barnes", "Steve Rogers", "Sam Wilson", "Clint Barton"], correct: 0 },
+  { q: "In what year was the first Iron Man movie released?", a: ["2008", "2010", "2012", "2005"], correct: 0 },
+  { q: "What is Captain America's shield made of?", a: ["Vibranium", "Adamantium", "Uru", "Titanium"], correct: 0 },
+  { q: "Who said the line 'I am Groot'?", a: ["Groot", "Rocket Raccoon", "Drax", "Yondu"], correct: 0 },
+  { q: "What is Black Widow's real name?", a: ["Natasha Romanoff", "Wanda Maximoff", "Maria Hill", "Yelena Belova"], correct: 0 },
+  { q: "Which Infinity Stone was housed in the Tesseract?", a: ["Space Stone", "Mind Stone", "Power Stone", "Soul Stone"], correct: 0 },
+  { q: "Who plays Spider-Man in the MCU?", a: ["Tom Holland", "Andrew Garfield", "Tobey Maguire", "Miles Morales"], correct: 0 },
+  { q: "What planet is Thanos from?", a: ["Titan", "Xandar", "Morag", "Vormir"], correct: 0 },
+  { q: "Which Avenger can shrink to tiny size?", a: ["Ant-Man", "Hulk", "Falcon", "Vision"], correct: 0 },
+  { q: "What is Tony Stark's AI assistant called in the early movies?", a: ["JARVIS", "FRIDAY", "ULTRON", "VISION"], correct: 0 },
+  { q: "Who directed the first Avengers movie?", a: ["Joss Whedon", "James Gunn", "Taika Waititi", "Ryan Coogler"], correct: 0 },
+  { q: "How many Infinity Stones are there?", a: ["6", "5", "7", "4"], correct: 0 },
+  { q: "What color is the Power Stone?", a: ["Purple", "Blue", "Red", "Orange"], correct: 0 },
+  { q: "Who is the God of Mischief?", a: ["Loki", "Thor", "Odin", "Heimdall"], correct: 0 },
+  { q: "What is the name of Doctor Strange's cloak?", a: ["Cloak of Levitation", "Crimson Bands of Cyttorak", "Eye of Agamotto Cape", "Sorcerer Supreme Robe"], correct: 0 },
+  { q: "In which movie did Black Panther first appear?", a: ["Captain America: Civil War", "Black Panther", "Avengers: Infinity War", "Avengers: Age of Ultron"], correct: 0 },
+  { q: "What is the real name of the Scarlet Witch?", a: ["Wanda Maximoff", "Agatha Harkness", "Monica Rambeau", "Darcy Lewis"], correct: 0 },
+  { q: "Who played the Hulk in the 2008 Incredible Hulk movie?", a: ["Edward Norton", "Mark Ruffalo", "Eric Bana", "Lou Ferrigno"], correct: 0 },
+  { q: "What is Star-Lord's real name?", a: ["Peter Quill", "Peter Parker", "Scott Lang", "Tony Stark"], correct: 0 },
+  { q: "Who says 'Avengers... assemble!' in Endgame?", a: ["Captain America", "Iron Man", "Thor", "Black Panther"], correct: 0 },
+  { q: "What is the name of Wakanda's king in the MCU?", a: ["T'Challa", "M'Baku", "Killmonger", "Okoye"], correct: 0 },
+  { q: "Which movie features the line 'I love you 3000'?", a: ["Avengers: Endgame", "Avengers: Infinity War", "Iron Man 3", "Spider-Man: Far From Home"], correct: 0 },
+  { q: "Who is the main villain in Doctor Strange (2016)?", a: ["Kaecilius", "Dormammu", "Baron Mordo", "The Ancient One"], correct: 0 },
+  { q: "Who is Gamora's adoptive father?", a: ["Thanos", "Ronan", "Ego", "Yondu"], correct: 0 },
+  { q: "What weapon does Hawkeye primarily use?", a: ["Bow and Arrow", "Sniper Rifle", "Sword", "Shield"], correct: 0 },
+  { q: "In which movie do the Guardians of the Galaxy first appear?", a: ["Guardians of the Galaxy", "Avengers: Infinity War", "Thor: Ragnarok", "Captain Marvel"], correct: 0 },
+  { q: "What is the name of Tony Stark's daughter?", a: ["Morgan", "Pepper", "Harley", "Cassie"], correct: 0 },
+  { q: "Who becomes the new Captain America in Falcon and the Winter Soldier?", a: ["Sam Wilson", "Bucky Barnes", "John Walker", "Isaiah Bradley"], correct: 0 },
+  { q: "What is the first song played in Guardians of the Galaxy Vol. 1?", a: ["Come and Get Your Love", "Mr. Blue Sky", "Hooked on a Feeling", "I Want You Back"], correct: 0 },
+  { q: "Which character can phase through walls in Ant-Man and the Wasp?", a: ["Ghost", "Vision", "America Chavez", "Monica Rambeau"], correct: 0 },
+  { q: "What planet does Thor end up on in Ragnarok?", a: ["Sakaar", "Asgard", "Nidavellir", "Xandar"], correct: 0 },
+  { q: "Who is the sorcerer supreme before Doctor Strange?", a: ["The Ancient One", "Wong", "Mordo", "Kaecilius"], correct: 0 },
+  { q: "Which Infinity Stone gives reality warping powers?", a: ["Reality Stone", "Mind Stone", "Time Stone", "Power Stone"], correct: 0 },
+  { q: "Who plays Loki in the MCU?", a: ["Tom Hiddleston", "Chris Hemsworth", "Idris Elba", "Anthony Hopkins"], correct: 0 },
+  { q: "What is the metal in Black Panther's suit?", a: ["Vibranium", "Adamantium", "Uru", "Carbonadium"], correct: 0 },
+  { q: "Which movie introduced Shang-Chi?", a: ["Shang-Chi and the Legend of the Ten Rings", "Eternals", "Doctor Strange 2", "Spider-Man: No Way Home"], correct: 0 },
+  { q: "Who says 'I'm always angry'?", a: ["Bruce Banner", "Tony Stark", "Thor", "Steve Rogers"], correct: 0 },
+  { q: "What is the name of the Guardians' ship?", a: ["Milano", "Benatar", "Knowhere", "Sanctuary II"], correct: 0 },
+  { q: "What is the name of the villain in Black Panther?", a: ["Killmonger", "Klaue", "M'Baku", "T'Challa"], correct: 0 },
+  { q: "Who is the leader of the Dora Milaje?", a: ["Okoye", "Ayo", "Shuri", "Nakia"], correct: 0 },
+  { q: "What is the name of Peter Quill's father?", a: ["Ego", "Yondu", "Ronan", "Thanos"], correct: 0 },
+  { q: "Who plays Nebula in the MCU?", a: ["Karen Gillan", "Pom Klementieff", "Zoe Saldana", "Elizabeth Olsen"], correct: 0 },
+  { q: "What is the name of Scott Lang's daughter?", a: ["Cassie", "Morgan", "Harley", "Pepper"], correct: 0 },
+  { q: "In which movie does Thor lose his eye?", a: ["Thor: Ragnarok", "Avengers: Infinity War", "Thor: The Dark World", "Avengers: Endgame"], correct: 0 },
+  { q: "What is the dragon-like creature in Shang-Chi called?", a: ["The Great Protector", "Fin Fang Foom", "Dormammu", "Surtur"], correct: 0 },
+  { q: "What does S.H.I.E.L.D. stand for?", a: ["Strategic Homeland Intervention, Enforcement and Logistics Division", "Super Hero Intelligence Enforcement League Division", "Strategic Heroes In Extreme Life Defense", "Secret Homeland Intelligence Enforcement League"], correct: 0 },
+  { q: "Who sacrificed themselves for the Soul Stone in Infinity War?", a: ["Gamora", "Black Widow", "Vision", "Nebula"], correct: 0 },
+  { q: "Which character wields Stormbreaker?", a: ["Thor", "Captain America", "Iron Man", "Groot"], correct: 0 },
+  { q: "What is the name of the alien race in the first Avengers?", a: ["Chitauri", "Skrulls", "Kree", "Outriders"], correct: 0 },
+  { q: "Who destroys the Infinity Gauntlet stones' power at the end of Endgame?", a: ["Iron Man", "Thor", "Captain Marvel", "Scarlet Witch"], correct: 0 },
+  { q: "Where is the Soul Stone hidden?", a: ["Vormir", "Titan", "Morag", "Knowhere"], correct: 0 },
+  { q: "Who is Peter Parker's best friend in the MCU?", a: ["Ned Leeds", "Harry Osborn", "Flash Thompson", "MJ"], correct: 0 },
+  { q: "What is Ant-Man's suit technology called?", a: ["Pym Particles", "Stark Tech", "Quantum Drive", "Shrink Drive"], correct: 0 },
+  { q: "What year does the main action of Avengers: Endgame take place in?", a: ["2023", "2018", "2025", "2012"], correct: 0 },
+  { q: "Which character time-traveled using a Quantum Tunnel hidden in a van?", a: ["Scott Lang / Ant-Man", "Tony Stark", "Bruce Banner", "Steve Rogers"], correct: 0 },
+  { q: "Who kills Thanos in the opening of Endgame?", a: ["Thor", "Iron Man", "Captain Marvel", "Scarlet Witch"], correct: 0 },
+  { q: "What is the name of Tony Stark's AI in later films after JARVIS?", a: ["FRIDAY", "ULTRON", "VISION", "EDITH"], correct: 0 },
+];
+/* ============================================================
+   END OF QUESTIONS DATABASE
+   ============================================================ */
+
+
+/* ============================================================
+   GAME LOGIC — edit below only if changing how the game works
+   ============================================================ */
+let selectedCount = 3;
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let answered = [];
+let isPlaying = false;
+let timerInterval = null;
+let timeLeft = 15;
+const TIMER_SECONDS = 15;
+
+const audio = document.getElementById("bgmusic");
+
+function selectMode(el, count) {
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  selectedCount = count;
+}
+
+function toggleMusic() {
+  const btn = document.getElementById('musicBtn');
+  if (isPlaying) {
+    audio.pause();
+    btn.textContent = '🎵 Epic Music: OFF';
+    btn.classList.remove('on');
+  } else {
+    audio.play().catch(() => {
+      btn.textContent = '🎵 Music unavailable';
+    });
+    btn.textContent = '⏸ Epic Music: ON';
+    btn.classList.add('on');
+  }
+  isPlaying = !isPlaying;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  // Pick random questions, then shuffle each question's answers
+  // Correct answer is tracked by TEXT so shuffle can't break it
+  currentQuestions = shuffle(questionsDB).slice(0, selectedCount).map(q => {
+    const correctText = q.a[q.correct];
+    const shuffledAnswers = shuffle(q.a);
+    return {
+      q: q.q,
+      a: shuffledAnswers,
+      correct: shuffledAnswers.indexOf(correctText)
+    };
+  });
+
+  currentIndex = 0;
+  score = 0;
+  answered = [];
+
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  document.getElementById('qTotal').textContent = selectedCount;
+
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = currentQuestions[currentIndex];
+  document.getElementById('qNum').textContent = currentIndex + 1;
+  document.getElementById('scoreLive').textContent = score;
+  document.getElementById('questionText').textContent = q.q;
+
+  const pct = (currentIndex / selectedCount) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.a.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = ans;
+    btn.onclick = () => checkAnswer(i);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('nextBtn').classList.remove('visible');
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  timeLeft = TIMER_SECONDS;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timeUp();
     }
+  }, 1000);
+}
 
-    function shuffle(array) {
-      return array.sort(() => Math.random() - 0.5);
-    }
+function updateTimerUI() {
+  const fill = document.getElementById('timerFill');
+  const num = document.getElementById('timerNum');
+  fill.style.width = (timeLeft / TIMER_SECONDS * 100) + '%';
+  num.textContent = timeLeft;
+  const urgent = timeLeft <= 5;
+  fill.classList.toggle('urgent', urgent);
+  num.classList.toggle('urgent', urgent);
+}
 
-    function startQuiz() {
-      currentQuestions = shuffle([...questionsDB]).slice(0, 3);
-      currentIndex = 0;
-      score = 0;
-      document.getElementById("result").style.display = "none";
-      document.getElementById("quiz").style.display = "block";
-      document.getElementById("next-btn").style.display = "none";
-      showQuestion();
-    }
+function timeUp() {
+  disableAllAnswers();
+  answered.push({ q: currentQuestions[currentIndex].q, correct: false, timedOut: true });
+  flashFeedback(false);
+  showNext();
+}
 
-    function showQuestion() {
-      const q = currentQuestions[currentIndex];
-      document.getElementById("q-num").textContent = currentIndex + 1;
-      document.getElementById("question-text").textContent = q.q;
-      
-      const optionsDiv = document.getElementById("options");
-      optionsDiv.innerHTML = "";
+function checkAnswer(selectedIndex) {
+  clearInterval(timerInterval);
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selectedIndex === q.correct;
+  if (isCorrect) score++;
 
-      // Shuffle the answers
-      let shuffled = [...q.a];
-      shuffled = shuffle(shuffled);
+  document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === selectedIndex && !isCorrect) btn.classList.add('wrong');
+    else btn.classList.add('dimmed');
+  });
 
-      shuffled.forEach(answer => {
-        const btn = document.createElement("button");
-        btn.textContent = answer;
-        btn.className = "answer-btn";
-        btn.onclick = () => checkAnswer(answer, q.a[q.correct]);
-        optionsDiv.appendChild(btn);
-      });
-    }
+  answered.push({ q: q.q, correct: isCorrect });
+  flashFeedback(isCorrect);
+  showNext();
+}
 
-    function checkAnswer(selectedText, correctText) {
-      if (selectedText === correctText) score++;
-      
-      const buttons = document.querySelectorAll(".answer-btn");
-      buttons.forEach(btn => {
-        btn.disabled = true;
-        if (btn.textContent === correctText) {
-          btn.classList.add("correct");
-        }
-      });
-      
-      document.getElementById("next-btn").style.display = "inline-block";
-      if (currentIndex === 2) {
-        document.getElementById("next-btn").textContent = "See Your Score!";
-      }
-    }
+function disableAllAnswers() {
+  const q = currentQuestions[currentIndex];
+  document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else btn.classList.add('dimmed');
+  });
+}
 
-    function nextQuestion() {
-      currentIndex++;
-      if (currentIndex < 3) {
-        showQuestion();
-        document.getElementById("next-btn").style.display = "none";
-        document.getElementById("next-btn").textContent = "Next Question";
-      } else {
-        endQuiz();
-      }
-    }
+function flashFeedback(isCorrect) {
+  const el = document.getElementById('feedbackFlash');
+  el.className = 'feedback-flash ' + (isCorrect ? 'correct-flash' : 'wrong-flash') + ' show';
+  setTimeout(() => el.classList.remove('show'), 300);
+}
 
-    function endQuiz() {
-      document.getElementById("quiz").style.display = "none";
-      const resultDiv = document.getElementById("result");
-      resultDiv.style.display = "block";
-      
-      let message = score === 3 ? "🦸‍♂️ Perfect score! You're a true MCU Master!" :
-                    score === 2 ? "👍 Great job! Almost a perfect run!" :
-                    score === 1 ? "🍿 Not bad — time for a rewatch marathon!" :
-                    "Time to binge the entire saga again!";
+function showNext() {
+  const btn = document.getElementById('nextBtn');
+  btn.textContent = currentIndex === selectedCount - 1 ? 'See Results →' : 'Next →';
+  btn.classList.add('visible');
+}
 
-      resultDiv.innerHTML = `
-        <h2>Quiz Complete!</h2>
-        <p>Your score: <strong>${score}/3</strong></p>
-        <p>${message}</p>
-        <button onclick="startQuiz()" style="background:#00bfff; padding:18px 45px; font-size:1.35em;">Play Again</button>
-      `;
-    }
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex < selectedCount) {
+    showQuestion();
+  } else {
+    endQuiz();
+  }
+}
 
-    window.onload = startQuiz;
-  </script>
+function endQuiz() {
+  clearInterval(timerInterval);
+  document.getElementById('quizScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+
+  const pct = score / selectedCount;
+  const resultData = pct === 1
+    ? { title: "🦸 MCU MASTER", msg: "Perfect score! Fury would put you on the Avengers Initiative." }
+    : pct >= 0.7
+    ? { title: "⚡ WORTHY HERO", msg: "Strong showing. You clearly spend quality time in the MCU." }
+    : pct >= 0.4
+    ? { title: "🍿 CASUAL FAN", msg: "Not bad — time for a rewatch marathon before your next attempt." }
+    : { title: "💀 THANOS WINS", msg: "The snap got you. Binge the entire saga and come back stronger." };
+
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultTotal').textContent = `out of ${selectedCount} correct`;
+  document.getElementById('resultTitle').textContent = resultData.title;
+  document.getElementById('resultMsg').textContent = resultData.msg;
+
+  document.getElementById('breakdown').innerHTML = answered.map(a => `
+    <div class="breakdown-row">
+      <span class="breakdown-q">${a.q}</span>
+      <span class="breakdown-icon">${a.correct ? '✅' : (a.timedOut ? '⏱' : '❌')}</span>
+    </div>
+  `).join('');
+}
+
+function goHome() {
+  clearInterval(timerInterval);
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'block';
+}
+
+</script>
+
+</body>
+</html>
